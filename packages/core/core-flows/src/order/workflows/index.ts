@@ -22,6 +22,7 @@ export * from "./create-fulfillment"
 export * from "./create-order-change"
 export * from "./create-order-change-actions"
 export * from "./create-order-payment-collection"
+export * from "./create-or-update-order-payment-collection" // added export
 export * from "./create-order"
 export * from "./create-shipment"
 export * from "./decline-order-change"
