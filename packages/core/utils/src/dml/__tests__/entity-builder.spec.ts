@@ -1450,6 +1450,94 @@ describe("Entity builder", () => {
         },
       })
     })
+
+    test("define a float property", () => {
+      const tax = model.define("tax", {
+        id: model.number(),
+        rate: model.float(),
+      })
+
+      expect(tax.name).toEqual("Tax")
+      expect(tax.parse().tableName).toEqual("tax")
+
+      const Tax = toMikroORMEntity(tax)
+      expectTypeOf(new Tax()).toMatchTypeOf<{
+        id: number
+        rate: number
+      }>()
+
+      const metaData = MetadataStorage.getMetadataFromDecorator(Tax)
+      expect(metaData.className).toEqual("Tax")
+      expect(metaData.path).toEqual("Tax")
+
+      expect(metaData.filters).toEqual({
+        softDeletable: {
+          name: "softDeletable",
+          cond: expect.any(Function),
+          default: true,
+          args: false,
+        },
+      })
+
+      expect(metaData.properties).toEqual({
+        id: {
+          reference: "scalar",
+          type: "number",
+          columnType: "integer",
+          name: "id",
+          fieldName: "id",
+          nullable: false,
+          getter: false,
+          setter: false,
+        },
+        rate: {
+          reference: "scalar",
+          type: "number",
+          columnType: "real",
+          name: "rate",
+          fieldName: "rate",
+          serializer: Number,
+          nullable: false,
+          getter: false,
+          setter: false,
+        },
+        created_at: {
+          reference: "scalar",
+          type: "date",
+          columnType: "timestamptz",
+          name: "created_at",
+          fieldName: "created_at",
+          defaultRaw: "now()",
+          onCreate: expect.any(Function),
+          nullable: false,
+          getter: false,
+          setter: false,
+        },
+        updated_at: {
+          reference: "scalar",
+          type: "date",
+          columnType: "timestamptz",
+          name: "updated_at",
+          fieldName: "updated_at",
+          defaultRaw: "now()",
+          onCreate: expect.any(Function),
+          onUpdate: expect.any(Function),
+          nullable: false,
+          getter: false,
+          setter: false,
+        },
+        deleted_at: {
+          reference: "scalar",
+          type: "date",
+          columnType: "timestamptz",
+          name: "deleted_at",
+          fieldName: "deleted_at",
+          nullable: true,
+          getter: false,
+          setter: false,
+        },
+      })
+    })
   })
 
   describe("Entity builder | relationships", () => {
@@ -2326,7 +2414,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
         },
         created_at: {
@@ -2508,7 +2595,7 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
+          onDelete: undefined,
         },
         created_at: {
           reference: "scalar",
@@ -2595,7 +2682,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "owner",
         },
         created_at: {
@@ -2687,7 +2773,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
           cascade: ["persist", "soft-remove"],
           onDelete: "cascade",
@@ -2851,9 +2936,7 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
-          cascade: ["persist", "soft-remove"],
           onDelete: "cascade",
         },
         created_at: {
@@ -3040,7 +3123,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
         },
         email_id: {
           columnType: "text",
@@ -3251,7 +3333,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "owner",
         },
         email_id: {
@@ -3356,7 +3437,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           cascade: ["persist", "soft-remove"],
           mappedBy: "user",
         },
@@ -3532,7 +3612,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           cascade: ["persist", "soft-remove"],
           mappedBy: "user",
         },
@@ -3736,6 +3815,7 @@ describe("Entity builder", () => {
         },
         group: {
           entity: "Group",
+          fieldName: "group_id",
           name: "group",
           nullable: false,
           persist: false,
@@ -4355,6 +4435,7 @@ describe("Entity builder", () => {
         },
         user: {
           entity: "User",
+          fieldName: "user_id",
           name: "user",
           nullable: false,
           persist: false,
@@ -4363,8 +4444,8 @@ describe("Entity builder", () => {
         user_id: {
           columnType: "text",
           entity: "User",
-          fieldName: "user_id",
           mapToPk: true,
+          fieldName: "user_id",
           name: "user_id",
           nullable: false,
           onDelete: "cascade",
@@ -4491,7 +4572,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
         },
         created_at: {
@@ -4689,7 +4769,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
         },
         created_at: {
@@ -4949,6 +5028,7 @@ describe("Entity builder", () => {
           name: "user",
           reference: "m:1",
           entity: "User",
+          fieldName: "user_id",
           persist: false,
           nullable: false,
         },
@@ -5136,6 +5216,7 @@ describe("Entity builder", () => {
         user: {
           name: "user",
           reference: "m:1",
+          fieldName: "user_id",
           entity: "User",
           persist: false,
           nullable: true,
@@ -5322,7 +5403,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
         },
         created_at: {
@@ -5522,7 +5602,6 @@ describe("Entity builder", () => {
           reference: "1:1",
           name: "email",
           entity: "Email",
-          nullable: false,
           mappedBy: "user",
         },
         created_at: {
@@ -5697,6 +5776,7 @@ describe("Entity builder", () => {
         },
         parent: {
           name: "parent",
+          fieldName: "parent_id",
           reference: "m:1",
           entity: "User",
           persist: false,
@@ -5833,7 +5913,6 @@ describe("Entity builder", () => {
           entity: "User",
           mappedBy: "parent",
           name: "child",
-          nullable: false,
           reference: "1:1",
         },
         created_at: {
@@ -6238,6 +6317,86 @@ describe("Entity builder", () => {
           setter: false,
         },
       })
+    })
+
+    test("should define onDelete cascade on pivot entity when applying detach cascade", () => {
+      const teamUser = model.define("teamUser", {
+        id: model.number(),
+        user: model.belongsTo(() => user, { mappedBy: "teams" }),
+        team: model.belongsTo(() => team, { mappedBy: "users" }),
+      })
+      const user = model
+        .define("user", {
+          id: model.number(),
+          username: model.text(),
+          teams: model.manyToMany(() => team, {
+            pivotEntity: () => teamUser,
+          }),
+        })
+        .cascades({
+          detach: ["teams"],
+        })
+
+      const team = model
+        .define("team", {
+          id: model.number(),
+          name: model.text(),
+          users: model.manyToMany(() => user, {
+            pivotEntity: () => teamUser,
+          }),
+        })
+        .cascades({
+          detach: ["users"],
+        })
+
+      type CascadeDetach = Parameters<(typeof team)["cascades"]>[0]["detach"]
+
+      expectTypeOf<CascadeDetach>().toEqualTypeOf<"users"[] | undefined>()
+
+      const [, , TeamUserEntity] = toMikroOrmEntities([user, team, teamUser])
+
+      const teamUserMetadata =
+        MetadataStorage.getMetadataFromDecorator(TeamUserEntity)
+      expect(teamUserMetadata.properties).toEqual(
+        expect.objectContaining({
+          user_id: {
+            reference: "scalar",
+            type: "User",
+            columnType: "text",
+            fieldName: "user_id",
+            nullable: false,
+            name: "user_id",
+            getter: false,
+            setter: false,
+          },
+          user: {
+            name: "user",
+            reference: "m:1",
+            entity: "User",
+            nullable: false,
+            persist: false,
+            onDelete: "cascade",
+          },
+          team_id: {
+            reference: "scalar",
+            type: "Team",
+            columnType: "text",
+            fieldName: "team_id",
+            nullable: false,
+            name: "team_id",
+            getter: false,
+            setter: false,
+          },
+          team: {
+            name: "team",
+            reference: "m:1",
+            entity: "Team",
+            nullable: false,
+            persist: false,
+            onDelete: "cascade",
+          },
+        })
+      )
     })
 
     test("throw error when unable to locate relationship via mappedBy", () => {
@@ -7447,39 +7606,37 @@ describe("Entity builder", () => {
         },
         user_id: {
           name: "user_id",
-          reference: "m:1",
-          entity: "User",
+          reference: "scalar",
           columnType: "text",
-          mapToPk: true,
           fieldName: "user_id",
+          getter: false,
+          setter: false,
           nullable: false,
+          type: "User",
         },
         user: {
-          reference: "scalar",
-          type: "User",
+          reference: "m:1",
+          entity: "User",
           persist: false,
           nullable: false,
           name: "user",
-          getter: false,
-          setter: false,
         },
         team_id: {
           name: "team_id",
-          reference: "m:1",
-          entity: "Team",
+          reference: "scalar",
           columnType: "text",
-          mapToPk: true,
           fieldName: "team_id",
           nullable: false,
+          getter: false,
+          setter: false,
+          type: "Team",
         },
         team: {
-          reference: "scalar",
-          type: "Team",
+          reference: "m:1",
+          entity: "Team",
           persist: false,
           nullable: false,
           name: "team",
-          getter: false,
-          setter: false,
         },
         created_at: {
           reference: "scalar",

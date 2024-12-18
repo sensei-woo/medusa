@@ -19,7 +19,7 @@ In this chapter, you'll add a UI route to the admin dashboard that shows the all
 
 ## 1. Get Brands API Route
 
-In a [previous chapter](../../extend-features/query-linked-records/page.mdx), you learned how to add an API route that retrieves brands and their products using [Query](../../../advanced-development/module-links/query/page.mdx). You'll expand that API route to support pagination, so that on the admin dashboard you can show the brands in a paginated table.
+In a [previous chapter](../../extend-features/query-linked-records/page.mdx), you learned how to add an API route that retrieves brands and their products using [Query](../../../fundamentals/module-links/query/page.mdx). You'll expand that API route to support pagination, so that on the admin dashboard you can show the brands in a paginated table.
 
 Replace or create the `GET` API route at `src/api/admin/brands/route.ts` with the following:
 
@@ -76,7 +76,7 @@ You return in the response the retrieved brands and the pagination configuration
 
 <Note>
 
-Learn more about pagination with Query in [this chapter](../../../advanced-development/module-links/query/page.mdx#apply-pagination).
+Learn more about pagination with Query in [this chapter](../../../fundamentals/module-links/query/page.mdx#apply-pagination).
 
 </Note>
 
@@ -125,7 +125,7 @@ export default defineMiddlewares({
 
 You apply the `validateAndTransformQuery` middleware on the `GET /admin/brands` API route. The middleware accepts two parameters:
 
-- A [Zod](https://zod.dev/) schema that a request's query parameters must satisfy. Medusa provides a `createFindParams` utility that generates a Zod schema with the following properties:
+- A [Zod](https://zod.dev/) schema that a request's query parameters must satisfy. Medusa provides `createFindParams` that generates a Zod schema with the following properties:
     - `fields`: A comma-separated string indicating the fields to retrieve.
     - `limit`: The maximum number of items to retrieve.
     - `offset`: The number of items to skip before retrieving the returned items.
@@ -138,7 +138,7 @@ By applying the above middleware, you can pass pagination configurations to `GET
 
 <Note>
 
-Learn more about using the `validateAndTransformQuery` middleware to configure Query in [this chapter](../../../advanced-development/module-links/query/page.mdx#request-query-configurations).
+Learn more about using the `validateAndTransformQuery` middleware to configure Query in [this chapter](../../../fundamentals/module-links/query/page.mdx#request-query-configurations).
 
 </Note>
 
@@ -186,7 +186,7 @@ You'll now add the UI route that shows the paginated list of brands. A UI route 
 
 <Note>
 
-Learn more about UI routes in [this chapter](../../../advanced-development/admin/ui-routes/page.mdx).
+Learn more about UI routes in [this chapter](../../../fundamentals/admin/ui-routes/page.mdx).
 
 </Note>
 
@@ -291,8 +291,6 @@ export const Table = ({
       setCurrentPage(currentPage - 1)
     }
   }
-
-  console.log(pageCount, canNextPage, canPreviousPage, currentPage)
 
   return (
     <div className="flex h-full flex-col overflow-hidden !border-t-0">

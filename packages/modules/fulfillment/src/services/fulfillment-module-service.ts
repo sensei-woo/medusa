@@ -1,9 +1,11 @@
 import {
+  CalculatedShippingOptionPrice,
   Context,
   DAL,
   FilterableFulfillmentSetProps,
   FindConfig,
   FulfillmentDTO,
+  FulfillmentOption,
   FulfillmentTypes,
   IFulfillmentModuleService,
   InternalModuleDeclaration,
@@ -650,6 +652,28 @@ export default class FulfillmentModuleService
     return await this.baseRepository_.serialize<FulfillmentTypes.FulfillmentDTO>(
       fulfillment
     )
+  }
+
+  @InjectManager()
+  @EmitEvents()
+  async deleteFulfillment(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const fulfillment = await this.fulfillmentService_.retrieve(
+      id,
+      {},
+      sharedContext
+    )
+
+    if (!isPresent(fulfillment.canceled_at)) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Fulfillment with id ${fulfillment.id} needs to be canceled first before deleting`
+      )
+    }
+
+    await this.fulfillmentService_.delete(id, sharedContext)
   }
 
   @InjectManager()
@@ -1923,7 +1947,7 @@ export default class FulfillmentModuleService
 
   async retrieveFulfillmentOptions(
     providerId: string
-  ): Promise<Record<string, any>[]> {
+  ): Promise<FulfillmentOption[]> {
     return await this.fulfillmentProviderService_.getFulfillmentOptions(
       providerId
     )
@@ -1968,6 +1992,49 @@ export default class FulfillmentModuleService
     )
 
     return !!shippingOptions.length
+  }
+
+  @InjectManager()
+  async validateShippingOptionsForPriceCalculation(
+    shippingOptionsData: FulfillmentTypes.CreateShippingOptionDTO[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean[]> {
+    const nonCalculatedOptions = shippingOptionsData.filter(
+      (option) => option.price_type !== "calculated"
+    )
+
+    if (nonCalculatedOptions.length) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Cannot calculate price for non-calculated shipping options: ${nonCalculatedOptions
+          .map((o) => o.name)
+          .join(", ")}`
+      )
+    }
+
+    const promises = shippingOptionsData.map((option) =>
+      this.fulfillmentProviderService_.canCalculate(
+        option.provider_id,
+        option as unknown as Record<string, unknown>
+      )
+    )
+
+    return await promiseAll(promises)
+  }
+
+  async calculateShippingOptionsPrices(
+    shippingOptionsData: FulfillmentTypes.CalculateShippingOptionPriceDTO[]
+  ): Promise<CalculatedShippingOptionPrice[]> {
+    const promises = shippingOptionsData.map((data) =>
+      this.fulfillmentProviderService_.calculatePrice(
+        data.provider_id,
+        data.optionData,
+        data.data,
+        data.context
+      )
+    )
+
+    return await promiseAll(promises)
   }
 
   @InjectTransactionManager()

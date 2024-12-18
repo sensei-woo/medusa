@@ -7,23 +7,23 @@ export const metadata = {
 
 # {metadata.title}
 
-This document provides an example of implementing the digital product recipe.
+In this guide, you'll learn how to support digital products in Medusa.
 
-<Note>
+When you install a Medusa application, you get a fully-fledged commerce platform with support for customizations. Medusa provides all features related to products and managing them, and its framework allows you to extend those features and implement your custom use case.
 
-You can implement digital products as you see fit for your use case. This is only an example of one way to implement it.
+You can extend Medusa's product features to support selling, storing, and fulfilling digital products. In this guide, you'll customize Medusa to add the following features:
 
-</Note>
-
-## Features
-
-By following this example, you’ll have a commerce application with the following features:
-
-1. Digital products with multiple media items.
+1. Support digital products with multiple media items.
 2. Manage digital products from the admin dashboard.
 3. Handle and fulfill digital product orders.
 4. Allow customers to download their digital product purchases from the storefront.
 5. All other commerce features that Medusa provides.
+
+<Note>
+
+This guide provides an example of an approach to implement digital products. You're free to choose a different approach using Medusa's framework.
+
+</Note>
 
 <CardList items={[
   {
@@ -42,14 +42,50 @@ By following this example, you’ll have a commerce application with the followi
 
 ---
 
+## Step 1: Install a Medusa Application
+
 <Prerequisites items={[
   {
-    text: "A new Medusa application installed.",
-    link: "!docs!#get-started"
+    text: "Node.js v20+",
+    link: "https://nodejs.org/en/download"
   },
+  {
+    text: "Git CLI tool",
+    link: "https://git-scm.com/downloads"
+  },
+  {
+    text: "PostgreSQL",
+    link: "https://www.postgresql.org/download/"
+  }
 ]} />
 
-## Step 1: Create the Digital Product Module
+Start by installing the Medusa application on your machine with the following command:
+
+```bash
+npx create-medusa-app@latest
+```
+
+You'll first be asked for the project's name. You can also optionally choose to install the [Next.js starter storefront](../../../../nextjs-starter/page.mdx).
+
+Afterwards, the installation process will start, which will install the Medusa application in a directory with your project's name. If you chose to install the Next.js starter, it'll be installed in a separate directory with the `{project-name}-storefront` name.
+
+<Note title="Why is the storefront installed separately?">
+
+The Medusa application is composed of a headless Node.js server and an admin dashboard. The storefront is installed or custom-built separately and connects to the Medusa application through its REST endpoints, called [API routes](!docs!/learn/fundamentals/api-routes). Learn more about Medusa's architecture in [this documentation](!docs!/learn/introduction/architecture).
+
+</Note>
+
+Once the installation finishes successfully, the Medusa Admin dashboard will open with a form to create a new user. Enter the user's credential and submit the form. Afterwards, you can login with the new user and explore the dashboard.
+
+<Note title="Ran to Errors?">
+
+Check out the [troubleshooting guides](../../../../troubleshooting/create-medusa-app-errors/page.mdx) for help.
+
+</Note>
+
+---
+
+## Step 2: Create the Digital Product Module
 
 Medusa creates commerce features in modules. For example, product features and data models are created in the Product Module.
 
@@ -136,6 +172,7 @@ const DigitalProductOrder = model.define("digital_product_order", {
   status: model.enum(OrderStatus),
   products: model.manyToMany(() => DigitalProduct, {
     mappedBy: "orders",
+    pivotTable: "digitalproduct_digitalproductorders"
   }),
 })
 
@@ -174,7 +211,7 @@ class DigitalProductModuleService extends MedusaService({
 export default DigitalProductModuleService
 ```
 
-The service extends the [service factory](!docs!/learn/advanced-development/modules/service-factory), which provides basic data-management features.
+The service extends the [service factory](!docs!/learn/fundamentals/modules/service-factory), which provides basic data-management features.
 
 ### Create Module Definition
 
@@ -208,12 +245,12 @@ module.exports = defineConfig({
 
 ### Further Reads
 
-- [How to Create a Module](!docs!/learn/basics/modules)
-- [How to Create a Data Model](!docs!/learn/basics/modules#1-create-data-model)
+- [How to Create a Module](!docs!/learn/fundamentals/modules)
+- [How to Create a Data Model](!docs!/learn/fundamentals/modules#1-create-data-model)
 
 ---
 
-## Step 2: Define Links
+## Step 3: Define Links
 
 Modules are isolated in Medusa, making them reusable, replaceable, and integrable in your application without side effects.
 
@@ -268,11 +305,11 @@ This defines a link between `DigitalProductOrder` and the Order Module’s `Orde
 
 ### Further Read
 
-- [How to Define Module Links](!docs!/learn/advanced-development/module-links)
+- [How to Define Module Links](!docs!/learn/fundamentals/module-links)
 
 ---
 
-## Step 3: Run Migrations and Sync Links
+## Step 4: Run Migrations and Sync Links
 
 To create tables for the digital product data models in the database, start by generating the migrations for the Digital Product Module with the following command:
 
@@ -290,7 +327,7 @@ npx medusa db:migrate
 
 ---
 
-## Step 4: List Digital Products Admin API Route
+## Step 5: List Digital Products Admin API Route
 
 To expose custom commerce features to frontend applications, such as the Medusa Admin dashboard or a storefront, you expose an endpoint by creating an API route.
 
@@ -376,12 +413,12 @@ Make sure to replace `{token}` with the JWT token you retrieved.
 
 ### Further Reads
 
-- [How to Create an API Route](!docs!/learn/basics/api-routes)
-- [Learn more about Query](!docs!/learn/advanced-development/module-links/query)
+- [How to Create an API Route](!docs!/learn/fundamentals/api-routes)
+- [Learn more about Query](!docs!/learn/fundamentals/module-links/query)
 
 ---
 
-## Step 5: Create Digital Product Workflow
+## Step 6: Create Digital Product Workflow
 
 To implement and expose a feature that manipulates data, you create a workflow that uses services to implement the functionality, then create an API route that executes that workflow.
 
@@ -626,13 +663,13 @@ You’ll test out the workflow in the next section.
 
 ### Further Reads
 
-- [How to Create a Workflow](!docs!/learn/basics/workflows)
-- [What is the Compensation Function](!docs!/learn/advanced-development/workflows/compensation-function)
-- [Learn more about the remote link function](!docs!/learn/advanced-development/module-links/remote-link)
+- [How to Create a Workflow](!docs!/learn/fundamentals/workflows)
+- [What is the Compensation Function](!docs!/learn/fundamentals/workflows/compensation-function)
+- [Learn more about the remote link function](!docs!/learn/fundamentals/module-links/remote-link)
 
 ---
 
-## Step 6: Create Digital Product API Route
+## Step 7: Create Digital Product API Route
 
 In this step, you’ll add the API route to create a digital product using the `createDigitalProductWorkflow`.
 
@@ -704,10 +741,10 @@ This defines the expected request body schema.
 Finally, create the file `src/api/middlewares.ts` with the following content:
 
 ```ts title="src/api/middlewares.ts"
-import { defineMiddlewares } from "@medusajs/medusa"
 import { 
+  defineMiddlewares,
   validateAndTransformBody,
-} from "@medusajs/framework"
+} from "@medusajs/framework/http"
 import { createDigitalProductsSchema } from "./validation-schemas"
 
 export default defineMiddlewares({
@@ -727,11 +764,11 @@ This adds a validation middleware to ensure that the body of `POST` requests sen
 
 ### Further Read
 
-- [How to Create a Middleware](!docs!/learn/advanced-development/api-routes/middlewares)
+- [How to Create a Middleware](!docs!/learn/fundamentals/api-routes/middlewares)
 
 ---
 
-## Step 7: Upload Digital Product Media API Route
+## Step 8: Upload Digital Product Media API Route
 
 To upload the digital product media files, use Medusa’s File Module.
 
@@ -796,7 +833,7 @@ export const POST = async (
 
 This adds a `POST` API route at `/admin/digital-products/upload/[type]` where `[type]` is either `preview` or `main`.
 
-In the route handler, you use the `uploadFilesWorkflow` imported from `@medusajs/medusa/core-flows` to upload the file. If the file type is `main`, it’s uploaded with private access, as only customers who purchased it can download it. Otherwise, it’s uploaded with `public` access.
+In the route handler, you use `uploadFilesWorkflow` from Medusa's core workflows to upload the file. If the file type is `main`, it’s uploaded with private access, as only customers who purchased it can download it. Otherwise, it’s uploaded with `public` access.
 
 Next, add to the file `src/api/middlewares.ts` the `multer` middleware on this API route:
 
@@ -824,7 +861,7 @@ You’ll test out this API route in the next step as you use these API routes in
 
 ---
 
-## Step 8: Add Digital Products UI Route in Admin
+## Step 9: Add Digital Products UI Route in Admin
 
 The Medusa Admin is customizable, allowing you to inject widgets into existing pages or add UI routes to create new pages.
 
@@ -1062,12 +1099,12 @@ Once you log in, you’ll find a new sidebar item, “Digital Products.” If yo
 
 ### Further Reads
 
-- [How to Create UI Routes](!docs!/learn/advanced-development/admin/ui-routes)
-- [How to Create Admin Widgets](!docs!/learn/advanced-development/admin/widgets)
+- [How to Create UI Routes](!docs!/learn/fundamentals/admin/ui-routes)
+- [How to Create Admin Widgets](!docs!/learn/fundamentals/admin/widgets)
 
 ---
 
-## Step 9: Add Create Digital Product Form in Admin
+## Step 10: Add Create Digital Product Form in Admin
 
 In this step, you’ll add a form for admins to create digital products. The form opens in a drawer or side window from within the Digital Products UI route you created in the previous section.
 
@@ -1443,7 +1480,7 @@ To use this digital product in later steps (such as to create an order), you mus
 
 ---
 
-## Step 10: Create Digital Product Fulfillment Module Provider
+## Step 11: Create Digital Product Fulfillment Module Provider
 
 In this step, you'll create a fulfillment module provider for digital products. It doesn't have any real fulfillment functionality as digital products aren't physically fulfilled.
 
@@ -1560,7 +1597,7 @@ This is necessary to use the fulfillment provider's shipping option during check
 
 ---
 
-## Step 11: Customize Cart Completion
+## Step 12: Customize Cart Completion
 
 In this step, you’ll customize the cart completion flow to not only create a Medusa order, but also create a digital product order.
 
@@ -1669,11 +1706,11 @@ export const createDpoWorkflowHighlights = [
   ["27", "completeCartWorkflow", "Create an order for the cart."],
   ["33", "useQueryGraphStep", "Retrieve the order's items and their associated variants and linked digital products."],
   ["57", "when", "Check whether the order has any digital products."],
-  ["60", "then", "Perform the callback function if an order has digital products."],
-  ["63", "createDigitalProductOrderStep", "Create the digital product order."],
-  ["67", "createRemoteLinkStep", "Link the digital product order to the Medusa order."],
-  ["76", "createOrderFulfillmentWorkflow", "Create a fulfillment for the digital products in the order."],
-  ["90", "emitEventStep", "Emit the `digital_product_order.created` event."]
+  ["63", "then", "Perform the callback function if an order has digital products."],
+  ["66", "createDigitalProductOrderStep", "Create the digital product order."],
+  ["70", "createRemoteLinkStep", "Link the digital product order to the Medusa order."],
+  ["79", "createOrderFulfillmentWorkflow", "Create a fulfillment for the digital products in the order."],
+  ["93", "emitEventStep", "Emit the `digital_product_order.created` event."]
 ]
 
 ```ts title="src/workflows/create-digital-product-order/index.ts" highlights={createDpoWorkflowHighlights} collapsibleLines="1-17" expandMoreLabel="Show Imports"
@@ -1733,10 +1770,13 @@ const createDigitalProductOrderWorkflow = createWorkflow(
       }
     )
 
-    const digital_product_order = when(itemsWithDigitalProducts, (itemsWithDigitalProducts) => {
-      return itemsWithDigitalProducts.length
-    })
-    .then(() => {
+    const digital_product_order = when(
+      "create-digital-product-order-condition", 
+      itemsWithDigitalProducts, 
+      (itemsWithDigitalProducts) => {
+        return itemsWithDigitalProducts.length
+      }
+    ).then(() => {
       const { 
         digital_product_order,
       } = createDigitalProductOrderStep({
@@ -1836,17 +1876,17 @@ In a later step, you’ll add an API route to allow customers to view and downlo
 
 ### Further Read
 
-- [Conditions in Workflows with When-Then](!docs!/learn/advanced-development/workflows/conditions)
+- [Conditions in Workflows with When-Then](!docs!/learn/fundamentals/workflows/conditions)
 
 ---
 
-## Step 12: Fulfill Digital Order Workflow
+## Step 13: Fulfill Digital Order Workflow
 
 In this step, you'll create a workflow that fulfills a digital order by sending a notification to the customer. Later, you'll execute this workflow in a subscriber that listens to the `digital_product_order.created` event.
 
 The workflow has the following steps:
 
-1. Retrieve the digital product order's details. For this, you'll use the `useQueryGraphStep` imported from `@medusajs/medusa/core-flows`.
+1. Retrieve the digital product order's details. For this, you'll use `useQueryGraphStep` from Medusa's core workflows.
 2. Send a notification to the customer with the digital products to download.
 
 So, you only need to implement the second step.
@@ -1869,7 +1909,7 @@ export type DigitalProductOrder =
 
 This adds a type for a digital product order, which you'll use next.
 
-You use the `InferTypeOf` utility to infer the type of the `DigitalProductOrder` data model, and add to it the optional `order` property, which is the linked order.
+You use `InferTypeOf` to infer the type of the `DigitalProductOrder` data model, and add to it the optional `order` property, which is the linked order.
 
 ### Create sendDigitalOrderNotificationStep
 
@@ -2013,7 +2053,7 @@ export const fulfillDigitalOrderWorkflow = createWorkflow(
 
 In the workflow, you:
 
-1. Retrieve the digital product order's details using the `useQueryGraphStep` imported from `@medusajs/medusa/core-flows`.
+1. Retrieve the digital product order's details using `useQueryGraphStep` from Medusa's core workflows.
 2. Send a notification to the customer with the digital product download links using the `sendDigitalOrderNotificationStep`.
 
 ### Configure Notification Module Provider
@@ -2051,7 +2091,7 @@ module.exports = defineConfig({
 
 ---
 
-## Step 13: Handle the Digital Product Order Event
+## Step 14: Handle the Digital Product Order Event
 
 A subscriber is an asynchronous function that, when an event is emitted, is executed. You can implement in subscribers features that aren't essential to the original flow that emitted the event.
 
@@ -2094,7 +2134,7 @@ To test out the subscriber, place an order with digital products. This triggers 
 
 ---
 
-## Step 14: Create Store API Routes
+## Step 15: Create Store API Routes
 
 In this step, you’ll create three store API routes:
 
@@ -2319,17 +2359,19 @@ You’ll test out these API routes in the next step.
 
 ### Further Reads
 
-- [What are protected API routes](!docs!/learn/advanced-development/api-routes/protected-routes)
+- [What are protected API routes](!docs!/learn/fundamentals/api-routes/protected-routes)
 
 ---
 
-## Step 15: Customize Next.js Starter
+## Step 16: Customize Next.js Starter
 
 In this section, you’ll customize the [Next.js Starter storefront](../../../../nextjs-starter/page.mdx) to:
 
 1. Show a preview button on a digital product’s page to view the preview files.
 2. Add a new tab in the customer’s dashboard to view their purchased digital products.
 3. Allow customers to download the digital products through the new page in the dashboard.
+
+If you haven't installed the Next.js Starter storefront in the first step, refer to [this guide](../../../../nextjs-starter/page.mdx#approach-2-install-separately) to learn how to install it.
 
 ### Add Types
 
@@ -2746,4 +2788,4 @@ Aside from customizing the Next.js Starter storefront, you can also create a cus
 
 ### Admin Development
 
-In this recipe, you learned how to customize the admin with UI routes. You can also do further customization using widgets. Learn more in [this documentation](!docs!/learn/advanced-development/admin).
+In this recipe, you learned how to customize the admin with UI routes. You can also do further customization using widgets. Learn more in [this documentation](!docs!/learn/fundamentals/admin).

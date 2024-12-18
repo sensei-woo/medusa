@@ -1,3 +1,5 @@
+import { CalculateShippingOptionPriceDTO } from "./mutations"
+
 export type FulfillmentOption = {
   /**
    * The option's ID.
@@ -10,6 +12,11 @@ export type FulfillmentOption = {
    */
   is_return?: boolean
   [k: string]: unknown
+}
+
+export type CalculatedShippingOptionPrice = {
+  calculated_amount: number
+  is_calculated_price_tax_inclusive: boolean
 }
 
 export interface IFulfillmentProvider {
@@ -41,16 +48,16 @@ export interface IFulfillmentProvider {
    *
    * Check if the provider can calculate the fulfillment price.
    */
-  canCalculate(data: Record<string, unknown>): Promise<any>
+  canCalculate(data: Record<string, unknown>): Promise<boolean>
   /**
    *
    * Calculate the price for the given fulfillment option.
    */
   calculatePrice(
-    optionData: Record<string, unknown>,
-    data: Record<string, unknown>,
-    context: Record<string, unknown>
-  ): Promise<any>
+    optionData: CalculateShippingOptionPriceDTO["optionData"],
+    data: CalculateShippingOptionPriceDTO["data"],
+    context: CalculateShippingOptionPriceDTO["context"]
+  ): Promise<CalculatedShippingOptionPrice>
   /**
    *
    * Create a fulfillment for the given data.

@@ -21,10 +21,11 @@ import { camelToSnakeCase, pluralize } from "../../../common"
 import { DmlEntity } from "../../entity"
 import { HasMany } from "../../relations/has-many"
 import { HasOne } from "../../relations/has-one"
+import { HasOneWithForeignKey } from "../../relations/has-one-fk"
 import { ManyToMany as DmlManyToMany } from "../../relations/many-to-many"
 import { applyEntityIndexes } from "../mikro-orm/apply-indexes"
 import { parseEntityName } from "./parse-entity-name"
-import { HasOneWithForeignKey } from "../../relations/has-one-fk"
+import { BelongsTo } from "../../relations"
 
 type Context = {
   MANY_TO_MANY_TRACKED_RELATIONS: Record<string, boolean>
@@ -138,24 +139,32 @@ function validateManyToManyRelationshipWithoutMappedBy({
 export function defineHasOneRelationship(
   MikroORMEntity: EntityConstructor<any>,
   relationship: RelationshipMetadata,
+  relatedEntity: DmlEntity<
+    Record<string, PropertyType<any> | RelationshipType<any>>,
+    any
+  >,
   { relatedModelName }: { relatedModelName: string },
-  cascades: EntityCascades<string[]>
+  cascades: EntityCascades<string[], string[]>
 ) {
   const shouldRemoveRelated = !!cascades.delete?.includes(relationship.name)
+  const { schema: relationSchema } = relatedEntity.parse()
 
   let mappedBy: string | undefined = camelToSnakeCase(MikroORMEntity.name)
   if ("mappedBy" in relationship) {
     mappedBy = relationship.mappedBy
   }
 
+  const isOthersideBelongsTo =
+    !!mappedBy && BelongsTo.isBelongsTo(relationSchema[mappedBy])
+
   const oneToOneOptions = {
     entity: relatedModelName,
-    nullable: relationship.nullable,
+    ...(relationship.nullable ? { nullable: relationship.nullable } : {}),
     ...(mappedBy ? { mappedBy } : {}),
     onDelete: shouldRemoveRelated ? "cascade" : undefined,
   } as OneToOneOptions<any, any>
 
-  if (shouldRemoveRelated) {
+  if (shouldRemoveRelated && !isOthersideBelongsTo) {
     oneToOneOptions.cascade = ["persist", "soft-remove"] as any
   }
 
@@ -170,7 +179,7 @@ export function defineHasOneWithFKRelationship(
   MikroORMEntity: EntityConstructor<any>,
   relationship: RelationshipMetadata,
   { relatedModelName }: { relatedModelName: string },
-  cascades: EntityCascades<string[]>
+  cascades: EntityCascades<string[], string[]>
 ) {
   const foreignKeyName = camelToSnakeCase(`${relationship.name}Id`)
   const shouldRemoveRelated = !!cascades.delete?.includes(relationship.name)
@@ -182,7 +191,7 @@ export function defineHasOneWithFKRelationship(
 
   OneToOne({
     entity: relatedModelName,
-    nullable: relationship.nullable,
+    ...(relationship.nullable ? { nullable: relationship.nullable } : {}),
     ...(mappedBy ? { mappedBy } : {}),
     cascade: shouldRemoveRelated
       ? (["persist", "soft-remove"] as any)
@@ -204,7 +213,7 @@ export function defineHasManyRelationship(
   MikroORMEntity: EntityConstructor<any>,
   relationship: RelationshipMetadata,
   { relatedModelName }: { relatedModelName: string },
-  cascades: EntityCascades<string[]>
+  cascades: EntityCascades<string[], string[]>
 ) {
   const shouldRemoveRelated = !!cascades.delete?.includes(relationship.name)
 
@@ -250,7 +259,7 @@ export function defineBelongsToRelationship(
    * define a onDelete: cascade when we are included in the delete
    * list of parent cascade.
    */
-  const shouldCascade = relationCascades.delete?.includes(mappedBy)
+  const shouldCascade = !!relationCascades.delete?.includes(mappedBy)
 
   /**
    * Ensure the mapped by is defined as relationship on the other side
@@ -328,26 +337,37 @@ export function defineBelongsToRelationship(
     DmlManyToMany.isManyToMany(otherSideRelation)
   ) {
     const foreignKeyName = camelToSnakeCase(`${relationship.name}Id`)
-
-    ManyToOne({
-      entity: relatedModelName,
-      columnType: "text",
-      mapToPk: true,
-      fieldName: foreignKeyName,
-      nullable: relationship.nullable,
-      onDelete: shouldCascade ? "cascade" : undefined,
-    })(MikroORMEntity.prototype, foreignKeyName)
+    const detachCascade =
+      !!relationship.mappedBy &&
+      relationCascades.detach?.includes(relationship.mappedBy)
 
     if (DmlManyToMany.isManyToMany(otherSideRelation)) {
       Property({
         type: relatedModelName,
-        persist: false,
+        columnType: "text",
+        fieldName: foreignKeyName,
         nullable: relationship.nullable,
-      })(MikroORMEntity.prototype, relationship.name)
-    } else {
-      // HasMany case
+      })(MikroORMEntity.prototype, foreignKeyName)
+
       ManyToOne({
         entity: relatedModelName,
+        nullable: relationship.nullable,
+        persist: false,
+        onDelete: shouldCascade || detachCascade ? "cascade" : undefined,
+      })(MikroORMEntity.prototype, relationship.name)
+    } else {
+      ManyToOne({
+        entity: relatedModelName,
+        columnType: "text",
+        mapToPk: true,
+        fieldName: foreignKeyName,
+        nullable: relationship.nullable,
+        onDelete: shouldCascade ? "cascade" : undefined,
+      })(MikroORMEntity.prototype, foreignKeyName)
+
+      ManyToOne({
+        entity: relatedModelName,
+        fieldName: foreignKeyName,
         persist: false,
         nullable: relationship.nullable,
       })(MikroORMEntity.prototype, relationship.name)
@@ -446,9 +466,30 @@ export function defineManyToManyRelationship(
   let inversedBy: undefined | string
   let pivotEntityName: undefined | string
   let pivotTableName: undefined | string
-  let joinColumn: undefined | string = relationship.options.joinColumn
-  let inverseJoinColumn: undefined | string =
+
+  const joinColumn: undefined | string = !Array.isArray(
+    relationship.options.joinColumn
+  )
+    ? relationship.options.joinColumn
+    : undefined
+
+  const joinColumns: undefined | string[] = Array.isArray(
+    relationship.options.joinColumn
+  )
+    ? relationship.options.joinColumn
+    : undefined
+
+  const inverseJoinColumn: undefined | string = !Array.isArray(
     relationship.options.inverseJoinColumn
+  )
+    ? relationship.options.inverseJoinColumn
+    : undefined
+
+  const inverseJoinColumns: undefined | string[] = Array.isArray(
+    relationship.options.inverseJoinColumn
+  )
+    ? relationship.options.inverseJoinColumn
+    : undefined
 
   const [otherSideRelationshipProperty, otherSideRelationship] =
     retrieveOtherSideRelationshipManyToMany({
@@ -540,7 +581,9 @@ export function defineManyToManyRelationship(
 
   const configuresRelationship = !!(
     joinColumn ||
+    joinColumns ||
     inverseJoinColumn ||
+    inverseJoinColumns ||
     relationship.options.pivotTable
   )
   const relatedOneConfiguresRelationship = !!(
@@ -586,7 +629,16 @@ export function defineManyToManyRelationship(
   const mappedByPropValue =
     mappedBy ?? inversedBy ?? otherSideRelationshipProperty
 
-  ManyToMany({
+  const joinColumnProp = Array.isArray(relationship.options.joinColumn)
+    ? "joinColumns"
+    : "joinColumn"
+  const inverseJoinColumnProp = Array.isArray(
+    relationship.options.inverseJoinColumn
+  )
+    ? "inverseJoinColumns"
+    : "inverseJoinColumn"
+
+  const manytoManyOptions = {
     owner: isOwner,
     entity: relatedModelName,
     ...(pivotTableName
@@ -598,9 +650,11 @@ export function defineManyToManyRelationship(
       : {}),
     ...(pivotEntityName ? { pivotEntity: pivotEntityName } : {}),
     ...({ [mappedByProp]: mappedByPropValue } as any),
-    ...(joinColumn ? { joinColumn } : {}),
-    ...(inverseJoinColumn ? { inverseJoinColumn } : {}),
-  })(MikroORMEntity.prototype, relationship.name)
+    [joinColumnProp]: joinColumn ?? joinColumns,
+    [inverseJoinColumnProp]: inverseJoinColumn ?? inverseJoinColumns,
+  }
+
+  ManyToMany(manytoManyOptions)(MikroORMEntity.prototype, relationship.name)
 }
 
 /**
@@ -610,7 +664,7 @@ export function defineRelationship(
   MikroORMEntity: EntityConstructor<any>,
   entity: DmlEntity<any, any>,
   relationship: RelationshipMetadata,
-  cascades: EntityCascades<string[]>,
+  cascades: EntityCascades<string[], string[]>,
   context: Context
 ) {
   /**
@@ -656,6 +710,7 @@ export function defineRelationship(
       defineHasOneRelationship(
         MikroORMEntity,
         relationship,
+        relatedEntity,
         relatedEntityInfo,
         cascades
       )
