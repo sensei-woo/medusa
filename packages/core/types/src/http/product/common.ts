@@ -375,6 +375,10 @@ export interface BaseProductListParams
    */
   id?: string | string[]
   /**
+   * Filter by external id(s).
+   */
+  external_id?: string | string[]
+  /**
    * Filter by whether the product is a gift card.
    */
   is_giftcard?: boolean
