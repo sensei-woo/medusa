@@ -1,6 +1,7 @@
 ---
 slug: /references/medusa-workflows/updateProductVariantsWorkflow
 sidebar_label: updateProductVariantsWorkflow
+sidebar_description: Update one or more product variants.
 tags:
   - product
   - pricing
@@ -19,13 +20,137 @@ This workflow updates one or more product variants. It's used by the [Update Pro
 This workflow has a hook that allows you to perform custom actions on the updated product variants. For example, you can pass under `additional_data` custom data that 
 allows you to update custom data models linked to the product variants.
 
-You can also use this workflow within your own custom workflows, allowing you to wrap custom logic around product-variant update.
+You can also use this workflow within your customizations or your own custom workflows, allowing you to wrap custom logic around product-variant update.
 
-<SourceCodeLink link="https://github.com/medusajs/medusa/blob/1b86c17b7293f3b810c062d78ec6ef563f968366/packages/core/core-flows/src/product/workflows/update-product-variants.ts#L118" />
+<SourceCodeLink link="https://github.com/medusajs/medusa/blob/43aa993971718063bb40e7e3f650ef0e84056d09/packages/core/core-flows/src/product/workflows/update-product-variants.ts#L118" />
+
+## Examples
 
 To update product variants by their IDs:
 
 <CodeTabs group="workflow-exection">
+    <CodeTab label="API Route" value="api-route">
+    
+```ts title="src/api/workflow/route.ts"
+import type {
+  MedusaRequest,
+  MedusaResponse,
+} from "@medusajs/framework/http"
+import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
+
+export async function POST(
+  req: MedusaRequest,
+  res: MedusaResponse
+) {
+  const { result } = await updateProductVariantsWorkflow(req.scope)
+    .run({
+      input: {
+        product_variants: [{
+            id: "variant_123",
+            prices: [{
+              amount: 10,
+              currency_code: "usd",
+            }]
+          },
+          {
+            id: "variant_321",
+            title: "Small Shirt",
+          },
+        ],
+        additional_data: {
+          erp_id: "123"
+        }
+      }
+    })
+
+  res.send(result)
+}
+```
+
+    </CodeTab>
+    <CodeTab label="Subscriber" value="subscriber">
+    
+```ts title="src/subscribers/order-placed.ts"
+import {
+  type SubscriberConfig,
+  type SubscriberArgs,
+} from "@medusajs/framework"
+import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
+
+export default async function handleOrderPlaced({
+  event: { data },
+  container,
+}: SubscriberArgs < { id: string } > ) {
+  const { result } = await updateProductVariantsWorkflow(container)
+    .run({
+      input: {
+        product_variants: [{
+            id: "variant_123",
+            prices: [{
+              amount: 10,
+              currency_code: "usd",
+            }]
+          },
+          {
+            id: "variant_321",
+            title: "Small Shirt",
+          },
+        ],
+        additional_data: {
+          erp_id: "123"
+        }
+      }
+    })
+
+  console.log(result)
+}
+
+export const config: SubscriberConfig = {
+  event: "order.placed",
+}
+```
+
+    </CodeTab>
+    <CodeTab label="Scheduled Job" value="scheduled-job">
+    
+```ts title="src/jobs/message-daily.ts"
+import { MedusaContainer } from "@medusajs/framework/types"
+import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
+
+export default async function myCustomJob(
+  container: MedusaContainer
+) {
+  const { result } = await updateProductVariantsWorkflow(container)
+    .run({
+      input: {
+        product_variants: [{
+            id: "variant_123",
+            prices: [{
+              amount: 10,
+              currency_code: "usd",
+            }]
+          },
+          {
+            id: "variant_321",
+            title: "Small Shirt",
+          },
+        ],
+        additional_data: {
+          erp_id: "123"
+        }
+      }
+    })
+
+  console.log(result)
+}
+
+export const config = {
+  name: "run-once-a-day",
+  schedule: "0 0 * * *",
+}
+```
+
+    </CodeTab>
     <CodeTab label="Another Workflow" value="another-workflow">
     
 ```ts title="src/workflows/my-workflow.ts"
@@ -60,6 +185,11 @@ const myWorkflow = createWorkflow(
 ```
 
     </CodeTab>
+  </CodeTabs>
+
+You can also update product variants by a selector:
+
+<CodeTabs group="workflow-exection">
     <CodeTab label="API Route" value="api-route">
     
 ```ts title="src/api/workflow/route.ts"
@@ -76,18 +206,15 @@ export async function POST(
   const { result } = await updateProductVariantsWorkflow(req.scope)
     .run({
       input: {
-        product_variants: [{
-            id: "variant_123",
-            prices: [{
-              amount: 10,
-              currency_code: "usd",
-            }]
-          },
-          {
-            id: "variant_321",
-            title: "Small Shirt",
-          },
-        ],
+        selector: {
+          product_id: "prod_123"
+        },
+        update: {
+          prices: [{
+            amount: 10,
+            currency_code: "usd"
+          }]
+        },
         additional_data: {
           erp_id: "123"
         }
@@ -115,18 +242,15 @@ export default async function handleOrderPlaced({
   const { result } = await updateProductVariantsWorkflow(container)
     .run({
       input: {
-        product_variants: [{
-            id: "variant_123",
-            prices: [{
-              amount: 10,
-              currency_code: "usd",
-            }]
-          },
-          {
-            id: "variant_321",
-            title: "Small Shirt",
-          },
-        ],
+        selector: {
+          product_id: "prod_123"
+        },
+        update: {
+          prices: [{
+            amount: 10,
+            currency_code: "usd"
+          }]
+        },
         additional_data: {
           erp_id: "123"
         }
@@ -154,18 +278,15 @@ export default async function myCustomJob(
   const { result } = await updateProductVariantsWorkflow(container)
     .run({
       input: {
-        product_variants: [{
-            id: "variant_123",
-            prices: [{
-              amount: 10,
-              currency_code: "usd",
-            }]
-          },
-          {
-            id: "variant_321",
-            title: "Small Shirt",
-          },
-        ],
+        selector: {
+          product_id: "prod_123"
+        },
+        update: {
+          prices: [{
+            amount: 10,
+            currency_code: "usd"
+          }]
+        },
         additional_data: {
           erp_id: "123"
         }
@@ -182,11 +303,6 @@ export const config = {
 ```
 
     </CodeTab>
-  </CodeTabs>
-
-You can also update product variants by a selector:
-
-<CodeTabs group="workflow-exection">
     <CodeTab label="Another Workflow" value="another-workflow">
     
 ```ts title="src/workflows/my-workflow.ts"
@@ -218,124 +334,11 @@ const myWorkflow = createWorkflow(
 ```
 
     </CodeTab>
-    <CodeTab label="API Route" value="api-route">
-    
-```ts title="src/api/workflow/route.ts"
-import type {
-  MedusaRequest,
-  MedusaResponse,
-} from "@medusajs/framework/http"
-import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
-
-export async function POST(
-  req: MedusaRequest,
-  res: MedusaResponse
-) {
-  const { result } = await updateProductVariantsWorkflow(req.scope)
-    .run({
-      input: {
-        selector: {
-          product_id: "prod_123"
-        },
-        update: {
-          prices: [{
-            amount: 10,
-            currency_code: "usd"
-          }]
-        },
-        additional_data: {
-          erp_id: "123"
-        }
-      }
-    })
-
-  res.send(result)
-}
-```
-
-    </CodeTab>
-    <CodeTab label="Subscriber" value="subscriber">
-    
-```ts title="src/subscribers/order-placed.ts"
-import {
-  type SubscriberConfig,
-  type SubscriberArgs,
-} from "@medusajs/framework"
-import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
-
-export default async function handleOrderPlaced({
-  event: { data },
-  container,
-}: SubscriberArgs < { id: string } > ) {
-  const { result } = await updateProductVariantsWorkflow(container)
-    .run({
-      input: {
-        selector: {
-          product_id: "prod_123"
-        },
-        update: {
-          prices: [{
-            amount: 10,
-            currency_code: "usd"
-          }]
-        },
-        additional_data: {
-          erp_id: "123"
-        }
-      }
-    })
-
-  console.log(result)
-}
-
-export const config: SubscriberConfig = {
-  event: "order.placed",
-}
-```
-
-    </CodeTab>
-    <CodeTab label="Scheduled Job" value="scheduled-job">
-    
-```ts title="src/jobs/message-daily.ts"
-import { MedusaContainer } from "@medusajs/framework/types"
-import { updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
-
-export default async function myCustomJob(
-  container: MedusaContainer
-) {
-  const { result } = await updateProductVariantsWorkflow(container)
-    .run({
-      input: {
-        selector: {
-          product_id: "prod_123"
-        },
-        update: {
-          prices: [{
-            amount: 10,
-            currency_code: "usd"
-          }]
-        },
-        additional_data: {
-          erp_id: "123"
-        }
-      }
-    })
-
-  console.log(result)
-}
-
-export const config = {
-  name: "run-once-a-day",
-  schedule: "0 0 * * *",
-}
-```
-
-    </CodeTab>
   </CodeTabs>
 
 ## Steps
 
-<WorkflowDiagram workflow={{"name":"updateProductVariantsWorkflow","steps":[{"type":"step","name":"updateProductVariantsStep","description":"This step updates one or more product variants.\n\n","link":"../../../Steps_Product/functions/core_flows.Product.Steps_Product.updateProductVariantsStep/page.mdx","depth":1},{"type":"step","name":"updatePriceSetsStep","description":"This step updates price sets.\n\n","link":"../../../../Pricing/Steps_Pricing/functions/core_flows.Pricing.Steps_Pricing.updatePriceSetsStep/page.mdx","depth":2},{"type":"step","name":"emitEventStep","description":"Emit an event.\n\n","link":"../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.emitEventStep/page.mdx","depth":3},{"type":"hook","name":"productVariantsUpdated","description":"This hook is executed after the product variants are updated. You can consume this hook to perform custom actions on the updated product variants.\n\n","link":"#productVariantsUpdated","depth":4}]}} />
+<WorkflowDiagram workflow={{"name":"updateProductVariantsWorkflow","steps":[{"type":"step","name":"updateProductVariantsStep","description":"This step updates one or more product variants.","link":"../../../Steps_Product/functions/core_flows.Product.Steps_Product.updateProductVariantsStep/page.mdx","depth":1},{"type":"step","name":"updatePriceSetsStep","description":"This step updates price sets.","link":"../../../../Pricing/Steps_Pricing/functions/core_flows.Pricing.Steps_Pricing.updatePriceSetsStep/page.mdx","depth":2},{"type":"step","name":"emitEventStep","description":"Emit an event.","link":"../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.emitEventStep/page.mdx","depth":3},{"type":"hook","name":"productVariantsUpdated","description":"This hook is executed after the product variants are updated. You can consume this hook to perform custom actions on the updated product variants.","link":"#productVariantsUpdated","depth":4}]}} />
 
 ## Input
 

@@ -1,6 +1,7 @@
 ---
 slug: /references/medusa-workflows/createReturnFulfillmentWorkflow
 sidebar_label: createReturnFulfillmentWorkflow
+sidebar_description: Create a fulfillment for a return.
 tags:
   - remote query
   - fulfillment
@@ -13,39 +14,24 @@ import { TypeList, WorkflowDiagram } from "docs-ui"
 
 This documentation provides a reference to the `createReturnFulfillmentWorkflow`. It belongs to the `@medusajs/medusa/core-flows` package.
 
-This workflow creates a fulfillment for a return.
+This workflow creates a fulfillment for a return. It's used by other return-related workflows,
+such as createAndCompleteReturnOrderWorkflow.
 
-<SourceCodeLink link="https://github.com/medusajs/medusa/blob/1b86c17b7293f3b810c062d78ec6ef563f968366/packages/core/core-flows/src/fulfillment/workflows/create-return-fulfillment.ts#L20" />
+You can use this workflow within your own customizations or custom workflows, allowing you to
+create a fulfillment for a return within your custom flows.
+
+:::note
+
+You can retrieve an order's details using [Query](https://docs.medusajs.com/learn/fundamentals/module-links/query),
+or [useQueryGraphStep](https://docs.medusajs.com/resources/references/medusa-workflows/steps/useQueryGraphStep).
+
+:::
+
+<SourceCodeLink link="https://github.com/medusajs/medusa/blob/43aa993971718063bb40e7e3f650ef0e84056d09/packages/core/core-flows/src/fulfillment/workflows/create-return-fulfillment.ts#L65" />
+
+## Examples
 
 <CodeTabs group="workflow-exection">
-    <CodeTab label="Another Workflow" value="another-workflow">
-    
-```ts title="src/workflows/my-workflow.ts"
-import { createWorkflow } from "@medusajs/framework/workflows-sdk"
-import { createReturnFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
-
-const myWorkflow = createWorkflow(
-  "my-workflow",
-  () => {
-    const result = createReturnFulfillmentWorkflow
-      .runAsStep({
-        input: {
-          "location_id": "{value}",
-          "provider_id": "{value}",
-          "delivery_address": {},
-          "items": [{
-            "title": "alias",
-            "sku": "{value}",
-            "quantity": 1,
-            "barcode": "{value}"
-          }]
-        }
-      })
-  }
-)
-```
-
-    </CodeTab>
     <CodeTab label="API Route" value="api-route">
     
 ```ts title="src/api/workflow/route.ts"
@@ -62,15 +48,27 @@ export async function POST(
   const { result } = await createReturnFulfillmentWorkflow(req.scope)
     .run({
       input: {
-        "location_id": "{value}",
-        "provider_id": "{value}",
-        "delivery_address": {},
-        "items": [{
-          "title": "alias",
-          "sku": "{value}",
-          "quantity": 1,
-          "barcode": "{value}"
-        }]
+        location_id: "sloc_123",
+        provider_id: "provider_123",
+        delivery_address: {
+          first_name: "John",
+          last_name: "Doe",
+          address_1: "Test street 1",
+          city: "Stockholm",
+          country_code: "se",
+          postal_code: "12345",
+          phone: "123456789"
+        },
+        items: [{
+          quantity: 1,
+          sku: "shirt",
+          title: "Shirt",
+          barcode: "123"
+        }],
+        order: {
+          id: "order_123"
+          // other order details...
+        }
       }
     })
 
@@ -95,15 +93,27 @@ export default async function handleOrderPlaced({
   const { result } = await createReturnFulfillmentWorkflow(container)
     .run({
       input: {
-        "location_id": "{value}",
-        "provider_id": "{value}",
-        "delivery_address": {},
-        "items": [{
-          "title": "alias",
-          "sku": "{value}",
-          "quantity": 1,
-          "barcode": "{value}"
-        }]
+        location_id: "sloc_123",
+        provider_id: "provider_123",
+        delivery_address: {
+          first_name: "John",
+          last_name: "Doe",
+          address_1: "Test street 1",
+          city: "Stockholm",
+          country_code: "se",
+          postal_code: "12345",
+          phone: "123456789"
+        },
+        items: [{
+          quantity: 1,
+          sku: "shirt",
+          title: "Shirt",
+          barcode: "123"
+        }],
+        order: {
+          id: "order_123"
+          // other order details...
+        }
       }
     })
 
@@ -128,15 +138,27 @@ export default async function myCustomJob(
   const { result } = await createReturnFulfillmentWorkflow(container)
     .run({
       input: {
-        "location_id": "{value}",
-        "provider_id": "{value}",
-        "delivery_address": {},
-        "items": [{
-          "title": "alias",
-          "sku": "{value}",
-          "quantity": 1,
-          "barcode": "{value}"
-        }]
+        location_id: "sloc_123",
+        provider_id: "provider_123",
+        delivery_address: {
+          first_name: "John",
+          last_name: "Doe",
+          address_1: "Test street 1",
+          city: "Stockholm",
+          country_code: "se",
+          postal_code: "12345",
+          phone: "123456789"
+        },
+        items: [{
+          quantity: 1,
+          sku: "shirt",
+          title: "Shirt",
+          barcode: "123"
+        }],
+        order: {
+          id: "order_123"
+          // other order details...
+        }
       }
     })
 
@@ -150,11 +172,51 @@ export const config = {
 ```
 
     </CodeTab>
+    <CodeTab label="Another Workflow" value="another-workflow">
+    
+```ts title="src/workflows/my-workflow.ts"
+import { createWorkflow } from "@medusajs/framework/workflows-sdk"
+import { createReturnFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
+
+const myWorkflow = createWorkflow(
+  "my-workflow",
+  () => {
+    const result = createReturnFulfillmentWorkflow
+      .runAsStep({
+        input: {
+          location_id: "sloc_123",
+          provider_id: "provider_123",
+          delivery_address: {
+            first_name: "John",
+            last_name: "Doe",
+            address_1: "Test street 1",
+            city: "Stockholm",
+            country_code: "se",
+            postal_code: "12345",
+            phone: "123456789"
+          },
+          items: [{
+            quantity: 1,
+            sku: "shirt",
+            title: "Shirt",
+            barcode: "123"
+          }],
+          order: {
+            id: "order_123"
+            // other order details...
+          }
+        }
+      })
+  }
+)
+```
+
+    </CodeTab>
   </CodeTabs>
 
 ## Steps
 
-<WorkflowDiagram workflow={{"name":"createReturnFulfillmentWorkflow","steps":[{"type":"step","name":"useRemoteQueryStep","description":"This step fetches data across modules using the remote query.\n\nLearn more in the [Remote Query documentation](https://docs.medusajs.com/learn/fundamentals/module-links/query).\n\n:::note\n\nThis step is deprecated. Use [useQueryGraphStep](../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.useQueryGraphStep/page.mdx) instead.\n\n:::\n\n","link":"../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.useRemoteQueryStep/page.mdx","depth":1},{"type":"step","name":"createReturnFulfillmentStep","description":"This step creates a fulfillment for a return.\n\n","link":"../../../Steps_Fulfillment/functions/core_flows.Fulfillment.Steps_Fulfillment.createReturnFulfillmentStep/page.mdx","depth":2}]}} />
+<WorkflowDiagram workflow={{"name":"createReturnFulfillmentWorkflow","steps":[{"type":"step","name":"useRemoteQueryStep","description":"This step fetches data across modules using the remote query.\n\nLearn more in the [Remote Query documentation](https://docs.medusajs.com/learn/fundamentals/module-links/query).\n\n:::note\n\nThis step is deprecated. Use [useQueryGraphStep](../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.useQueryGraphStep/page.mdx) instead.\n\n:::","link":"../../../../Common/Steps_Common/functions/core_flows.Common.Steps_Common.useRemoteQueryStep/page.mdx","depth":1},{"type":"step","name":"createReturnFulfillmentStep","description":"This step creates a fulfillment for a return.","link":"../../../Steps_Fulfillment/functions/core_flows.Fulfillment.Steps_Fulfillment.createReturnFulfillmentStep/page.mdx","depth":2}]}} />
 
 ## Input
 

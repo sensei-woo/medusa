@@ -1,6 +1,7 @@
 ---
 slug: /references/medusa-workflows/acceptOrderTransferValidationStep
 sidebar_label: acceptOrderTransferValidationStep
+sidebar_description: ""
 tags:
   - step
 ---
@@ -11,254 +12,31 @@ import { TypeList, WorkflowDiagram } from "docs-ui"
 
 This documentation provides a reference to the `acceptOrderTransferValidationStep`. It belongs to the `@medusajs/medusa/core-flows` package.
 
-This step validates that an order transfer can be accepted.
+This step validates that an order transfer can be accepted. If the
+order doesn't have an existing transfer request, the step throws an error.
 
-```ts title="src/workflows/my-workflow.ts"
-import { createWorkflow } from "@medusajs/framework/workflows-sdk"
-import { acceptOrderTransferValidationStep } from "@medusajs/medusa/core-flows"
+:::note
 
-const myWorkflow = createWorkflow(
-  "my-workflow",
-  () => {
-    const data = acceptOrderTransferValidationStep({
-      "token": "{value}",
-      "order": {
-        "id": "id_Dm6MF1JmTcnjA",
-        "version": 33,
-        "display_id": 31,
-        "status": "requires_action",
-        "currency_code": "{value}",
-        "created_at": "2025-12-09T19:18:32.990Z",
-        "updated_at": "2025-05-09T12:20:59.051Z",
-        "original_item_total": {
-          "numeric": 25
-        },
-        "original_item_subtotal": {
-          "numeric": 49
-        },
-        "original_item_tax_total": {
-          "numeric": 0
-        },
-        "item_total": {
-          "numeric": 46
-        },
-        "item_subtotal": {
-          "numeric": 1
-        },
-        "item_tax_total": {
-          "numeric": 36
-        },
-        "original_total": {
-          "numeric": 42
-        },
-        "original_subtotal": {
-          "numeric": 50
-        },
-        "original_tax_total": {
-          "numeric": 20
-        },
-        "total": {
-          "numeric": 7
-        },
-        "subtotal": {
-          "numeric": 46
-        },
-        "tax_total": {
-          "numeric": 17
-        },
-        "discount_subtotal": {
-          "numeric": 6
-        },
-        "discount_total": {
-          "numeric": 33
-        },
-        "discount_tax_total": {
-          "numeric": 33
-        },
-        "gift_card_total": {
-          "numeric": 16
-        },
-        "gift_card_tax_total": {
-          "numeric": 7
-        },
-        "shipping_total": {
-          "numeric": 47
-        },
-        "shipping_subtotal": {
-          "numeric": 38
-        },
-        "shipping_tax_total": {
-          "numeric": 42
-        },
-        "original_shipping_total": {
-          "numeric": 50
-        },
-        "original_shipping_subtotal": {
-          "numeric": 10
-        },
-        "original_shipping_tax_total": {
-          "numeric": 13
-        }
-      },
-      "orderChange": {
-        "id": "id_Bm44LHJd2L3zPx6aps",
-        "version": 34,
-        "order_id": "{value}",
-        "return_id": "{value}",
-        "exchange_id": "{value}",
-        "claim_id": "{value}",
-        "order": {
-          "id": "id_FHPUIZcWrxAZGp",
-          "version": 24,
-          "display_id": 34,
-          "status": "completed",
-          "currency_code": "{value}",
-          "created_at": "2025-04-11T23:50:07.541Z",
-          "updated_at": "2025-10-03T04:48:11.093Z",
-          "original_item_total": {
-            "numeric": 20
-          },
-          "original_item_subtotal": {
-            "numeric": 28
-          },
-          "original_item_tax_total": {
-            "numeric": 39
-          },
-          "item_total": {
-            "numeric": 4
-          },
-          "item_subtotal": {
-            "numeric": 45
-          },
-          "item_tax_total": {
-            "numeric": 4
-          },
-          "original_total": {
-            "numeric": 5
-          },
-          "original_subtotal": {
-            "numeric": 28
-          },
-          "original_tax_total": {
-            "numeric": 12
-          },
-          "total": {
-            "numeric": 2
-          },
-          "subtotal": {
-            "numeric": 41
-          },
-          "tax_total": {
-            "numeric": 30
-          },
-          "discount_subtotal": {
-            "numeric": 10
-          },
-          "discount_total": {
-            "numeric": 36
-          },
-          "discount_tax_total": {
-            "numeric": 11
-          },
-          "gift_card_total": {
-            "numeric": 9
-          },
-          "gift_card_tax_total": {
-            "numeric": 16
-          },
-          "shipping_total": {
-            "numeric": 2
-          },
-          "shipping_subtotal": {
-            "numeric": 34
-          },
-          "shipping_tax_total": {
-            "numeric": 18
-          },
-          "original_shipping_total": {
-            "numeric": 2
-          },
-          "original_shipping_subtotal": {
-            "numeric": 29
-          },
-          "original_shipping_tax_total": {
-            "numeric": 20
-          }
-        },
-        "return_order": {
-          "id": "id_VnT74LTkHFXzuEaQ5",
-          "status": "partially_received",
-          "order_id": "{value}",
-          "items": [{
-            "id": "id_QwPubSBTrBBFHqoQuhEG",
-            "return_id": "{value}",
-            "order_id": "{value}",
-            "item_id": "{value}",
-            "quantity": 50
-          }],
-          "display_id": 29,
-          "metadata": {}
-        },
-        "exchange": {
-          "id": "id_VIyNoG9pP7",
-          "order_id": "{value}",
-          "order_version": 21,
-          "display_id": 44,
-          "additional_items": [
-            "{value}"
-          ],
-          "metadata": {}
-        },
-        "claim": {
-          "id": "id_bmGZsi3woFpmO",
-          "type": "refund",
-          "order_id": "{value}",
-          "order_version": 18,
-          "display_id": 42,
-          "claim_items": [
-            "{value}"
-          ],
-          "additional_items": [
-            "{value}"
-          ],
-          "metadata": {}
-        },
-        "actions": [{
-          "id": "id_7hxoVnvdBwkYveMMQc",
-          "order_change_id": {},
-          "order_change": {},
-          "order_id": {},
-          "return_id": {},
-          "claim_id": {},
-          "exchange_id": {},
-          "order": {},
-          "reference": "{value}",
-          "reference_id": "{value}",
-          "action": "SHIPPING_ADD",
-          "details": {},
-          "internal_note": {},
-          "created_at": "2025-12-05T07:20:38.728Z",
-          "updated_at": "2025-01-17T14:45:46.519Z"
-        }],
-        "status": "pending",
-        "requested_by": {},
-        "requested_at": {},
-        "confirmed_by": {},
-        "confirmed_at": {},
-        "declined_by": {},
-        "declined_reason": {},
-        "metadata": {},
-        "declined_at": {},
-        "canceled_by": {},
-        "canceled_at": {},
-        "created_at": "2025-04-08T22:10:24.566Z",
-        "updated_at": "2025-09-05T03:03:12.480Z"
-      }
-    })
+You can retrieve an order and order change details using [Query](https://docs.medusajs.com/learn/fundamentals/module-links/query),
+or [useQueryGraphStep](https://docs.medusajs.com/resources/references/medusa-workflows/steps/useQueryGraphStep).
+
+:::
+
+## Example
+
+```ts
+const data = acceptOrderTransferValidationStep({
+  token: "sk_123456",
+  order: {
+    id: "order_123",
+    // other order details...
+  },
+  orderChange: {
+    id: "order_change_123",
+    // other order change details...
   }
-)
+})
 ```
-  
 
 ## Input
 
