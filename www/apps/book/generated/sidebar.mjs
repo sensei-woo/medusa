@@ -229,9 +229,9 @@ export const generatedSidebar = [
             "isPathHref": true,
             "type": "link",
             "path": "/learn/fundamentals/modules/modules-directory-structure",
-            "title": "Modules Directory Structure",
+            "title": "Directory Structure",
             "children": [],
-            "chapterTitle": "3.2.1. Modules Directory Structure"
+            "chapterTitle": "3.2.1. Directory Structure"
           },
           {
             "loaded": true,
@@ -368,6 +368,15 @@ export const generatedSidebar = [
             "title": "Custom Columns",
             "children": [],
             "chapterTitle": "3.3.4. Custom Columns"
+          },
+          {
+            "loaded": true,
+            "isPathHref": true,
+            "type": "link",
+            "path": "/learn/fundamentals/module-links/query-context",
+            "title": "Query Context",
+            "children": [],
+            "chapterTitle": "3.3.5. Query Context"
           }
         ],
         "chapterTitle": "3.3. Module Links"
@@ -583,10 +592,19 @@ export const generatedSidebar = [
             "loaded": true,
             "isPathHref": true,
             "type": "link",
+            "path": "/learn/fundamentals/workflows/constructor-constraints",
+            "title": "Constructor Constraints",
+            "children": [],
+            "chapterTitle": "3.6.1. Constructor Constraints"
+          },
+          {
+            "loaded": true,
+            "isPathHref": true,
+            "type": "link",
             "path": "/learn/fundamentals/workflows/variable-manipulation",
             "title": "Transform Variables",
             "children": [],
-            "chapterTitle": "3.6.1. Transform Variables"
+            "chapterTitle": "3.6.2. Transform Variables"
           },
           {
             "loaded": true,
@@ -595,16 +613,7 @@ export const generatedSidebar = [
             "path": "/learn/fundamentals/workflows/conditions",
             "title": "When-Then Conditions",
             "children": [],
-            "chapterTitle": "3.6.2. When-Then Conditions"
-          },
-          {
-            "loaded": true,
-            "isPathHref": true,
-            "type": "link",
-            "path": "/learn/fundamentals/workflows/constructor-constraints",
-            "title": "Constructor Constraints",
-            "children": [],
-            "chapterTitle": "3.6.3. Constructor Constraints"
+            "chapterTitle": "3.6.3. When-Then Conditions"
           },
           {
             "loaded": true,
@@ -784,10 +793,19 @@ export const generatedSidebar = [
             "loaded": true,
             "isPathHref": true,
             "type": "link",
+            "path": "/learn/fundamentals/admin/environment-variables",
+            "title": "Environment Variables",
+            "children": [],
+            "chapterTitle": "3.9.3. Environment Variables"
+          },
+          {
+            "loaded": true,
+            "isPathHref": true,
+            "type": "link",
             "path": "/learn/fundamentals/admin/constraints",
             "title": "Constraints",
             "children": [],
-            "chapterTitle": "3.9.3. Constraints"
+            "chapterTitle": "3.9.4. Constraints"
           },
           {
             "loaded": true,
@@ -796,7 +814,7 @@ export const generatedSidebar = [
             "path": "/learn/fundamentals/admin/tips",
             "title": "Tips",
             "children": [],
-            "chapterTitle": "3.9.4. Tips"
+            "chapterTitle": "3.9.5. Tips"
           }
         ],
         "chapterTitle": "3.9. Admin Development"

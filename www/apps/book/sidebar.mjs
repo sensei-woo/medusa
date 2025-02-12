@@ -135,7 +135,7 @@ export const sidebar = sidebarAttachHrefCommonOptions([
           {
             type: "link",
             path: "/learn/fundamentals/modules/modules-directory-structure",
-            title: "Modules Directory Structure",
+            title: "Directory Structure",
           },
           {
             type: "link",
@@ -213,6 +213,11 @@ export const sidebar = sidebarAttachHrefCommonOptions([
             type: "link",
             path: "/learn/fundamentals/module-links/custom-columns",
             title: "Custom Columns",
+          },
+          {
+            type: "link",
+            path: "/learn/fundamentals/module-links/query-context",
+            title: "Query Context",
           },
         ],
       },
@@ -337,6 +342,11 @@ export const sidebar = sidebarAttachHrefCommonOptions([
         children: [
           {
             type: "link",
+            path: "/learn/fundamentals/workflows/constructor-constraints",
+            title: "Constructor Constraints",
+          },
+          {
+            type: "link",
             path: "/learn/fundamentals/workflows/variable-manipulation",
             title: "Transform Variables",
           },
@@ -344,11 +354,6 @@ export const sidebar = sidebarAttachHrefCommonOptions([
             type: "link",
             path: "/learn/fundamentals/workflows/conditions",
             title: "When-Then Conditions",
-          },
-          {
-            type: "link",
-            path: "/learn/fundamentals/workflows/constructor-constraints",
-            title: "Constructor Constraints",
           },
           {
             type: "link",
@@ -450,6 +455,11 @@ export const sidebar = sidebarAttachHrefCommonOptions([
             type: "link",
             path: "/learn/fundamentals/admin/ui-routes",
             title: "Admin UI Routes",
+          },
+          {
+            type: "link",
+            path: "/learn/fundamentals/admin/environment-variables",
+            title: "Environment Variables",
           },
           {
             type: "link",

@@ -5724,6 +5724,9 @@
             "header": {
               "type": "string"
             },
+            "hint": {
+              "type": "string"
+            },
             "label": {
               "type": "string"
             },
@@ -5742,6 +5745,7 @@
           },
           "required": [
             "header",
+            "hint",
             "label",
             "connectedTo",
             "noChannels",
@@ -9202,6 +9206,39 @@
         "subtitle": {
           "type": "string"
         },
+        "list": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "object",
+              "properties": {
+                "heading": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": ["heading", "description"],
+              "additionalProperties": false
+            },
+            "filtered": {
+              "type": "object",
+              "properties": {
+                "heading": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": ["heading", "description"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["empty", "filtered"],
+          "additionalProperties": false
+        },
         "createSalesChannel": {
           "type": "string"
         },
@@ -9293,6 +9330,7 @@
       "required": [
         "domain",
         "subtitle",
+        "list",
         "createSalesChannel",
         "createSalesChannelHint",
         "enabledHint",

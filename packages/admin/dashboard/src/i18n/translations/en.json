@@ -1513,6 +1513,7 @@
     },
     "salesChannels": {
       "header": "Sales Channels",
+      "hint": "Manage the sales channels that are connected to this location.",
       "label": "Connected sales channels",
       "connectedTo": "Connected to {{count}} of {{total}} sales channels",
       "noChannels": "The location is not connected to any sales channels.",
@@ -2469,6 +2470,16 @@
   "salesChannels": {
     "domain": "Sales Channels",
     "subtitle": "Manage the online and offline channels you sell products on.",
+    "list": {
+      "empty": {
+        "heading": "No sales channels found",
+        "description": "Once a sales channel has been created, it will appear here."
+      },
+      "filtered": {
+        "heading": "No results",
+        "description": "No sales channels match the current filter criteria."
+      }
+    },
     "createSalesChannel": "Create Sales Channel",
     "createSalesChannelHint": "Create a new sales channel to sell your products on.",
     "enabledHint": "Specify whether the sales channel is enabled.",

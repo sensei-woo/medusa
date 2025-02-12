@@ -46,7 +46,7 @@ export interface ValidateProductInputStepInput {
 const validateProductInputStepId = "validate-product-input"
 /**
  * This step validates that all provided products have options.
- * If a product is missing options, an error is thrown.
+ * If a product is missing options or a shipping profile, an error is thrown.
  *
  * @example
  * const data = validateProductInputStep({
@@ -178,7 +178,7 @@ export const createProductsWorkflowId = "create-products"
  *
  * Create one or more products with options and variants.
  *
- * @property hooks.productCreated - This hook is executed after the products are created. You can consume this hook to perform custom actions on the created products.
+ * @property hooks.productsCreated - This hook is executed after the products are created. You can consume this hook to perform custom actions on the created products.
  */
 export const createProductsWorkflow = createWorkflow(
   createProductsWorkflowId,
